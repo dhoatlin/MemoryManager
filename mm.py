@@ -33,7 +33,7 @@ menubar.add_cascade(label='File', menu=fileMenu)
 root.config(menu=menubar)
 
 #creating a textbox
-inputFrame=Frame(root)
+inputFrame = Frame(root)
 inputbox = Text(inputFrame, height=10, width=30, state=DISABLED)
 scrollbar = Scrollbar(inputFrame)
 scrollbar.pack(side=RIGHT, fill=Y)
@@ -41,10 +41,17 @@ inputbox.pack()
 scrollbar.config(command=inputbox.yview)
 inputbox.config(yscrollcommand=scrollbar.set)
 
-inputFrame.grid(row=0, column=0)
+#create memory frame
+memFrame = Frame(root, height=300, width=100)
 
-#creating a browse button
-browseButton = Button(root, text='load', command=browse)
-browseButton.grid(row=1, column=0)
+#create output frame
+outputFrame = Frame(root)
+outputbox = Text(outputFrame, height = 20, width=80, state=DISABLED)
+outputbox.pack()
+
+#place frames in grid layout
+inputFrame.grid(row=0, column=0)
+memFrame.grid(row=0, column=1)
+outputFrame.grid(row=0, column=2)
 
 mainloop()
