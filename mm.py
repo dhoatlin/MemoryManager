@@ -2,14 +2,21 @@
 
 from Tkinter import *
 from tkFileDialog import *
+import math
 
 #line numbers
 currentLine = 1.0
 totalLines = 0
 
+#page/frame size
+pageSize = 512.0
+
 #colors
 available = '#82FF86'
 taken = '#FF4F4F'
+
+#program dictionary
+programs = {}
 
 '''------------------------------------------
 Defining function to be used during execution
@@ -70,18 +77,31 @@ def process():
   outputbox.insert(END, 'processing\n')
   outputbox.config(state=DISABLED)
   
+def removeProgram(inputs):
+  print 'removing'
+  
+def loadProgram(inputs):
+  print 'loading'
+  
 def parseInput(inputLine):
+  global pageSize
   splitInput = inputLine.split()
+  pid = splitInput[0]
   if splitInput[1] == '-1':
-    output = 'End of program ' + splitInput[0] + '\n'
+    output = 'End of program ' + pid + '\n'
+    removeProgram(splitInput)
   else:
-    output = 'Loading program ' + splitInput[0] + ' into RAM: code=' + splitInput[1] + ', data=' + splitInput[2] + '\n'
+    code = splitInput[1]
+    codePages = int(math.ceil(int(code) / pageSize))
+    data = splitInput[2]
+    dataPages = int(math.ceil(int(data) / pageSize))
+    output = 'Loading program ' + pid + ' into RAM: code=' + code + '(' + str(codePages) + ' page(s))' + ', data=' + data + '(' + str(dataPages) + ' page(s))' + '\n'
+    loadProgram(splitInput)
   return output
+
 '''---------------------------
 Creating the GUI using tkinter
 ---------------------------'''
-
-
 
 #create the main window
 root = Tk()
