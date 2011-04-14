@@ -17,6 +17,9 @@ def browse():
     
     #disbale writing to textbox
     inputbox.config(state=DISABLED)
+    
+def nextStep():
+  print 'step'
 
 #colors
 available = '#82FF86'
@@ -41,7 +44,7 @@ root.config(menu=menubar)
 
 #creating a textbox
 inputFrame = Frame(root)
-inputbox = Text(inputFrame, height=10, width=30, state=DISABLED)
+inputbox = Text(inputFrame, height=20, width=30, state=DISABLED)
 scrollbar = Scrollbar(inputFrame)
 scrollbar.pack(side=RIGHT, fill=Y)
 inputbox.pack()
@@ -50,15 +53,11 @@ inputbox.config(yscrollcommand=scrollbar.set)
 
 #create memory frame
 memFrame = Frame(root)
-
 pageFrames = []
 for i in range(8):
-  #newFrame = Frame(memFrame, height=40, width=120, bg='#8C80FF')
-  newLabel = Label(memFrame, text='Free', height=3, width=20, bg=taken, relief=SUNKEN)
+  newLabel = Label(memFrame, text='Free', height=3, width=20, bg=available, relief=SUNKEN)
   newLabel.grid(row=i)
-  #newFrame.grid(row=i, column=0)
   pageFrames.append(newLabel)
-
 
 #create output frame
 outputFrame = Frame(root)
@@ -69,9 +68,13 @@ outputbox.pack()
 outScrollbar.config(command=outputbox.yview)
 outputbox.config(yscrollcommand=outScrollbar.set)
 
+#create next button for stepping through
+nextButton = Button(root, text='next', command=nextStep)
+
 #place frames in grid layout
 inputFrame.grid(row=0, column=0, sticky=N)
-memFrame.grid(row=0, column=1)
+nextButton.grid(row=1, column=0)
+memFrame.grid(row=0, column=1, rowspan=2)
 outputFrame.grid(row=0, column=2, sticky=N)
 
 mainloop()
