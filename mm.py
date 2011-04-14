@@ -77,7 +77,11 @@ def nextStep():
   outputbox.config(state=DISABLED)
   
 def removeProgram(inputs):
-  print 'removing'
+  for i in range(len(pageFrames)):
+    if pageFrames[i]['pid'] == inputs['pid']:
+      pageFrames[i]['avail'] = True
+      pageFrames[i]['label'].config(bg=available, text='Free')
+      pageFrames[i]['pid'] = 'N/A'
   
 def loadProgram(inputs):
   total = inputs['codeSize'] + inputs['dataSize']
@@ -111,9 +115,10 @@ def loadProgram(inputs):
           labelText = page['type'] + '-' + page['logical'] + ' of P' + inputs['pid']
           pageFrames[i]['label'].config(bg=taken, text=labelText)
           pageFrames[i]['avail'] = False
+          pageFrames[i]['pid'] = inputs['pid']
           break
   else:
-    print ''
+    print 'not enough room'
   
 def parseInput(inputLine):
   global pageSize
@@ -121,7 +126,7 @@ def parseInput(inputLine):
   pid = splitInput[0]
   if splitInput[1] == '-1':
     output = 'End of program ' + pid + '\n'
-    removeProgram(splitInput)
+    removeProgram({'pid': pid})
   else:
     code = splitInput[1]
     codePages = int(math.ceil(int(code) / pageSize))
@@ -166,7 +171,7 @@ memFrame = Frame(root)
 for i in range(8):
   newLabel = Label(memFrame, text='Free', height=3, width=20, bg=available, relief=SUNKEN)
   newLabel.grid(row=i)
-  pageFrames.append({'label': newLabel, 'avail': True})
+  pageFrames.append({'label': newLabel, 'avail': True, 'pid': 'N/A'})
 
 #create output frame
 outputFrame = Frame(root)
