@@ -35,25 +35,48 @@ def browse():
       totalLines += 1
     file.close()
     
-    #disbale writing to textbox
+    #disbale writing to textbox enable next button
     inputbox.config(state=DISABLED)
     outputbox.config(state=DISABLED)
+    nextButton.config(state=NORMAL)
     
 def nextStep():
   global currentLine, totalLines
+  
+  #enable writing to output box
+  outputbox.config(state=NORMAL)
+    
   if currentLine <= totalLines:
-    outputbox.config(state=NORMAL)
-    inputLine = '==>' + inputbox.get(currentLine, currentLine+1)
-    outputbox.insert(END, inputLine)
-    outputbox.config(state=DISABLED)
+    #grab next line from input box and write to output box
+    inputLine = inputbox.get(currentLine, currentLine+1)
+    outputbox.insert(END, '==>' + inputLine)
+    
+    #parse input line to brief description of what is happening
+    output = parseInput(inputLine)
+    outputbox.insert(END, output)
+    
+    #update current line
     currentLine += 1.0
-    process()
+    #process()
+  else:
+    outputbox.insert(END, 'End of simulation')
+    nextButton.config(state=DISABLED)
+    
+  #disable output box
+  outputbox.config(state=DISABLED)
     
 def process():
   outputbox.config(state=NORMAL)
   outputbox.insert(END, 'processing\n')
   outputbox.config(state=DISABLED)
-
+  
+def parseInput(inputLine):
+  splitInput = inputLine.split()
+  if splitInput[1] == '-1':
+    output = 'End of program ' + splitInput[0] + '\n'
+  else:
+    output = 'Loading program ' + splitInput[0] + ' into RAM: code=' + splitInput[1] + ', data=' + splitInput[2] + '\n'
+  return output
 '''---------------------------
 Creating the GUI using tkinter
 ---------------------------'''
@@ -104,7 +127,7 @@ outScrollbar.config(command=outputbox.yview)
 outputbox.config(yscrollcommand=outScrollbar.set)
 
 #create next button for stepping through
-nextButton = Button(root, text='next', command=nextStep)
+nextButton = Button(root, text='next', command=nextStep, state=DISABLED)
 
 #place frames in grid layout
 inputFrame.grid(row=0, column=0, sticky=N)
