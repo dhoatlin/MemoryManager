@@ -75,7 +75,8 @@ def nextStep():
     
   #disable output box
   outputbox.config(state=DISABLED)
-  
+  '''
+  #for debugging: show every process paging table
   keys = pagingTables.keys()
   keys.sort()
   for key in keys:
@@ -83,7 +84,13 @@ def nextStep():
       print 'pid: ' + key + ' ' + str(pagingTables[key][i])
     print '----------------------'
   print '********************'
-  
+  '''
+  '''
+  #for debugging: show contents of every frame
+  for page in pageFrames:
+    print page
+  print '*****************************'
+  '''
 def removeProgram(inputs):
   for i in range(len(pageFrames)):
     if pageFrames[i]['pid'] == inputs['pid']:
@@ -106,7 +113,6 @@ def removeProgram(inputs):
             enough = True
             break
         if enough:
-          print 'resuming P' + key
           for page in pagingTables[key]:
             for j in range(len(pageFrames)):
               if pageFrames[j]['avail']:
@@ -115,8 +121,10 @@ def removeProgram(inputs):
                 labelText = page['type'] + '-' + page['logical'] + ' of P' + key
                 pageFrames[j]['label'].config(bg=taken, text=labelText)
                 pageFrames[j]['avail'] = False
-                pageFrames[j]['pid'] = inputs['pid']
+                pageFrames[j]['pid'] = key
                 break
+        found = 0
+        enough = False
   
   
 def loadProgram(inputs):
@@ -157,7 +165,6 @@ def loadProgram(inputs):
           break
         
   else:
-    print 'storing P' + inputs['pid']
     pagingTables[inputs['pid']] = []
     cCount = 0
     #initialize paging table
