@@ -69,17 +69,11 @@ def nextStep():
     
     #update current line
     currentLine += 1.0
-    #process()
   else:
     outputbox.insert(END, 'End of simulation')
     nextButton.config(state=DISABLED)
     
   #disable output box
-  outputbox.config(state=DISABLED)
-    
-def process():
-  outputbox.config(state=NORMAL)
-  outputbox.insert(END, 'processing\n')
   outputbox.config(state=DISABLED)
   
 def removeProgram(inputs):
@@ -91,7 +85,7 @@ def loadProgram(inputs):
   enough = False
   
   #first check if there is enough room for new program
-  for i in range(total):
+  for i in range(len(pageFrames)):
     if pageFrames[i]['avail']:
       found += 1
     if found == total:
@@ -111,12 +105,15 @@ def loadProgram(inputs):
       
     #add physical location
     for page in pagingTables[inputs['pid']]:
-      for i in range(total):
+      for i in range(len(pageFrames)):
         if(pageFrames[i]['avail']):
           page['physical'] = str(i)
           labelText = page['type'] + '-' + page['logical'] + ' of P' + inputs['pid']
           pageFrames[i]['label'].config(bg=taken, text=labelText)
           pageFrames[i]['avail'] = False
+          break
+  else:
+    print ''
   
 def parseInput(inputLine):
   global pageSize
