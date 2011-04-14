@@ -82,13 +82,9 @@ def removeProgram(inputs):
       pageFrames[i]['avail'] = True
       pageFrames[i]['label'].config(bg=available, text='Free')
       pageFrames[i]['pid'] = 'N/A'
-  
-def loadProgram(inputs):
-  total = inputs['codeSize'] + inputs['dataSize']
+  #following FIFO
   found = 0
   enough = False
-  
-  #following FIFO
   keys = pagingTables.keys()
   for key in keys:
     for i in range(len(pagingTables[key])):
@@ -97,22 +93,30 @@ def loadProgram(inputs):
         for j in range(len(pagingTables[key])):
           if pageFrames[j]['avail']:
             found += 1
-          if found == total:
+          if found == len(pagingTables[key]):
             enough = True
             break
           
         if enough:
           print 'resuming P' + key
-          pagingTables[key][i]['status'] = 'running'
           for page in pagingTables[key]:
             for j in range(len(pageFrames)):
               if pageFrames[j]['avail']:
                 page['physical'] = str(j)
+                page['status'] = 'running'
                 labelText = page['type'] + '-' + page['logical'] + ' of P' + key
                 pageFrames[j]['label'].config(bg=taken, text=labelText)
                 pageFrames[j]['avail'] = False
                 pageFrames[j]['pid'] = inputs['pid']
                 break
+  
+  
+def loadProgram(inputs):
+  total = inputs['codeSize'] + inputs['dataSize']
+  found = 0
+  enough = False
+  
+
             
   found = 0
   enough = False
@@ -214,7 +218,7 @@ for i in range(8):
 
 #create output frame
 outputFrame = Frame(root)
-outputbox = Text(outputFrame, height = 20, width=60, state=DISABLED)
+outputbox = Text(outputFrame, height = 20, width=70, state=DISABLED)
 outScrollbar = Scrollbar(outputFrame)
 outScrollbar.pack(side=RIGHT, fill=Y)
 outputbox.pack()
