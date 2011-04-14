@@ -3,6 +3,17 @@
 from Tkinter import *
 from tkFileDialog import *
 
+#line number
+currentLine = 1.0
+
+#colors
+available = '#82FF86'
+taken = '#FF4F4F'
+
+'''------------------------------------------
+Defining function to be used during execution
+------------------------------------------'''
+
 #browse function for loading a file
 def browse():
   file = askopenfile(parent=root, mode='rb',title='Choose a file')
@@ -19,11 +30,19 @@ def browse():
     inputbox.config(state=DISABLED)
     
 def nextStep():
-  print 'step'
+  global currentLine
+  outputbox.config(state=NORMAL)
+  inputLine = '==>' + inputbox.get(currentLine, currentLine+1)
+  outputbox.insert(END, inputLine)
+  outputbox.config(state=DISABLED)
+  currentLine += 1.0
+  
 
-#colors
-available = '#82FF86'
-taken = '#FF4F4F'
+'''---------------------------
+Creating the GUI using tkinter
+---------------------------'''
+
+
 
 #create the main window
 root = Tk()
@@ -77,4 +96,8 @@ nextButton.grid(row=1, column=0)
 memFrame.grid(row=0, column=1, rowspan=2)
 outputFrame.grid(row=0, column=2, sticky=N)
 
+
+'''------------------------------
+Start tkinter's event driven loop
+------------------------------'''
 mainloop()
