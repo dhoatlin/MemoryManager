@@ -88,13 +88,43 @@ def loadProgram(inputs):
   found = 0
   enough = False
   
-  #first check if there is enough room for new program
+  #following FIFO
+  keys = pagingTables.keys()
+  for key in keys:
+    for i in range(len(pagingTables[key])):
+      if pagingTables[key][i]['status'] == 'waiting':
+        #if pid is waiting, check for enough room
+        for j in range(len(pagingTables[key])):
+          if pageFrames[j]['avail']:
+            found += 1
+          if found == total:
+            enough = True
+            break
+          
+        if enough:
+          print 'resuming P' + key
+          pagingTables[key][i]['status'] = 'running'
+          for page in pagingTables[key]:
+            for j in range(len(pageFrames)):
+              if pageFrames[j]['avail']:
+                page['physical'] = str(j)
+                labelText = page['type'] + '-' + page['logical'] + ' of P' + key
+                pageFrames[j]['label'].config(bg=taken, text=labelText)
+                pageFrames[j]['avail'] = False
+                pageFrames[j]['pid'] = inputs['pid']
+                break
+            
+  found = 0
+  enough = False
+  #first check if there is enough room for a new program
+  #refactor this to new function...
   for i in range(len(pageFrames)):
     if pageFrames[i]['avail']:
       found += 1
     if found == total:
       enough = True
-      
+      break
+    
   #enough room -> add paging table to program
   if enough:
     pagingTables[inputs['pid']] = []
@@ -102,10 +132,10 @@ def loadProgram(inputs):
     #initialize paging table
     for i in range(total):
       if cCount < inputs['codeSize']:
-        pagingTables[inputs['pid']].append({'type': 'code', 'logical': str(i)})
+        pagingTables[inputs['pid']].append({'type': 'code', 'logical': str(i), 'status': 'running'})
         cCount += 1
       else:
-        pagingTables[inputs['pid']].append({'type': 'data', 'logical': str(i)})
+        pagingTables[inputs['pid']].append({'type': 'data', 'logical': str(i), 'status': 'running'})
       
     #add physical location
     for page in pagingTables[inputs['pid']]:
@@ -118,7 +148,16 @@ def loadProgram(inputs):
           pageFrames[i]['pid'] = inputs['pid']
           break
   else:
-    print 'not enough room'
+    print 'storing P' + inputs['pid']
+    pagingTables[inputs['pid']] = []
+    cCount = 0
+    #initialize paging table
+    for i in range(total):
+      if cCount < inputs['codeSize']:
+        pagingTables[inputs['pid']].append({'type': 'code', 'logical': str(i), 'status': 'waiting'})
+        cCount += 1
+      else:
+        pagingTables[inputs['pid']].append({'type': 'data', 'logical': str(i), 'status': 'waiting'})
   
 def parseInput(inputLine):
   global pageSize
