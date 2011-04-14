@@ -15,8 +15,13 @@ pageSize = 512.0
 available = '#82FF86'
 taken = '#FF4F4F'
 
-#program dictionary
-programs = {}
+#physical pages
+pageFrames = []
+
+#all paging tables
+pagingTables = {}
+
+
 
 '''------------------------------------------
 Defining function to be used during execution
@@ -81,7 +86,37 @@ def removeProgram(inputs):
   print 'removing'
   
 def loadProgram(inputs):
-  print 'loading'
+  total = inputs['codeSize'] + inputs['dataSize']
+  found = 0
+  enough = False
+  
+  #first check if there is enough room for new program
+  for i in range(total):
+    if pageFrames[i]['avail']:
+      found += 1
+    if found == total:
+      enough = True
+      
+  #enough room -> add paging table to program
+  if enough:
+    pagingTables[inputs['pid']] = []
+    cCount = 0
+    #initialize paging table
+    for i in range(total):
+      if cCount < inputs['codeSize']:
+        pagingTables[inputs['pid']].append({'type': 'code', 'logical': str(i)})
+        cCount += 1
+      else:
+        pagingTables[inputs['pid']].append({'type': 'data', 'logical': str(i)})
+      
+    #add physical location
+    for page in pagingTables[inputs['pid']]:
+      for i in range(total):
+        if(pageFrames[i]['avail']):
+          page['physical'] = str(i)
+          labelText = page['type'] + '-' + page['logical'] + ' of P' + inputs['pid']
+          pageFrames[i]['label'].config(bg=taken, text=labelText)
+          pageFrames[i]['avail'] = False
   
 def parseInput(inputLine):
   global pageSize
@@ -96,7 +131,7 @@ def parseInput(inputLine):
     data = splitInput[2]
     dataPages = int(math.ceil(int(data) / pageSize))
     output = 'Loading program ' + pid + ' into RAM: code=' + code + '(' + str(codePages) + ' page(s))' + ', data=' + data + '(' + str(dataPages) + ' page(s))' + '\n'
-    loadProgram(splitInput)
+    loadProgram({'pid': pid, 'codeSize': codePages, 'dataSize': dataPages})
   return output
 
 '''---------------------------
@@ -131,11 +166,10 @@ inputbox.config(yscrollcommand=scrollbar.set)
 
 #create memory frame
 memFrame = Frame(root)
-pageFrames = []
 for i in range(8):
   newLabel = Label(memFrame, text='Free', height=3, width=20, bg=available, relief=SUNKEN)
   newLabel.grid(row=i)
-  pageFrames.append(newLabel)
+  pageFrames.append({'label': newLabel, 'avail': True})
 
 #create output frame
 outputFrame = Frame(root)
