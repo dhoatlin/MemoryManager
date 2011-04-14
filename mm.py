@@ -18,6 +18,10 @@ def browse():
     #disbale writing to textbox
     inputbox.config(state=DISABLED)
 
+#colors
+available = '#82FF86'
+taken = '#FF4F4F'
+
 #create the main window
 root = Tk()
 root.title('Memory Manager - Dave Hoatlin')
@@ -45,15 +49,14 @@ scrollbar.config(command=inputbox.yview)
 inputbox.config(yscrollcommand=scrollbar.set)
 
 #create memory frame
-memFrame = Frame(root, height=400, width=150, bg='#525252')
+memFrame = Frame(root)
 
 pageFrames = []
 for i in range(8):
   #newFrame = Frame(memFrame, height=40, width=120, bg='#8C80FF')
-  newLabel = Label(memFrame, text='Free', height=3, width=20, bg='#8C80FF')
+  newLabel = Label(memFrame, text='Free', height=3, width=20, bg=taken, relief=SUNKEN)
   newLabel.grid(row=i)
   #newFrame.grid(row=i, column=0)
-  #pageFrames.append([newFrame, newLabel])
   pageFrames.append(newLabel)
 
 
