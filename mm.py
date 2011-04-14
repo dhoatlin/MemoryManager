@@ -3,8 +3,9 @@
 from Tkinter import *
 from tkFileDialog import *
 
-#line number
+#line numbers
 currentLine = 1.0
+totalLines = 0
 
 #colors
 available = '#82FF86'
@@ -16,27 +17,42 @@ Defining function to be used during execution
 
 #browse function for loading a file
 def browse():
+  global currentLine, totalLines
   file = askopenfile(parent=root, mode='rb',title='Choose a file')
   if file != None:
     #enable writing to textbox
     inputbox.config(state=NORMAL)
+    outputbox.config(state=NORMAL)
+    #delete old data from textboxes
+    inputbox.delete(1.0, END)
+    outputbox.delete(1.0, END)
     
     #write file to textbox
+    totalLines = 0
+    currentLine = 1.0
     for line in file:
       inputbox.insert(END, line)
+      totalLines += 1
     file.close()
     
     #disbale writing to textbox
     inputbox.config(state=DISABLED)
+    outputbox.config(state=DISABLED)
     
 def nextStep():
-  global currentLine
+  global currentLine, totalLines
+  if currentLine <= totalLines:
+    outputbox.config(state=NORMAL)
+    inputLine = '==>' + inputbox.get(currentLine, currentLine+1)
+    outputbox.insert(END, inputLine)
+    outputbox.config(state=DISABLED)
+    currentLine += 1.0
+    process()
+    
+def process():
   outputbox.config(state=NORMAL)
-  inputLine = '==>' + inputbox.get(currentLine, currentLine+1)
-  outputbox.insert(END, inputLine)
+  outputbox.insert(END, 'processing\n')
   outputbox.config(state=DISABLED)
-  currentLine += 1.0
-  
 
 '''---------------------------
 Creating the GUI using tkinter
