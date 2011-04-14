@@ -76,6 +76,14 @@ def nextStep():
   #disable output box
   outputbox.config(state=DISABLED)
   
+  keys = pagingTables.keys()
+  keys.sort()
+  for key in keys:
+    for i in range(len(pagingTables[key])):
+      print 'pid: ' + key + ' ' + str(pagingTables[key][i])
+    print '----------------------'
+  print '********************'
+  
 def removeProgram(inputs):
   for i in range(len(pageFrames)):
     if pageFrames[i]['pid'] == inputs['pid']:
@@ -86,6 +94,7 @@ def removeProgram(inputs):
   found = 0
   enough = False
   keys = pagingTables.keys()
+  keys.sort()
   for key in keys:
     for i in range(len(pagingTables[key])):
       if pagingTables[key][i]['status'] == 'waiting':
@@ -96,7 +105,6 @@ def removeProgram(inputs):
           if found == len(pagingTables[key]):
             enough = True
             break
-          
         if enough:
           print 'resuming P' + key
           for page in pagingTables[key]:
@@ -116,10 +124,6 @@ def loadProgram(inputs):
   found = 0
   enough = False
   
-
-            
-  found = 0
-  enough = False
   #first check if there is enough room for a new program
   #refactor this to new function...
   for i in range(len(pageFrames)):
@@ -151,6 +155,7 @@ def loadProgram(inputs):
           pageFrames[i]['avail'] = False
           pageFrames[i]['pid'] = inputs['pid']
           break
+        
   else:
     print 'storing P' + inputs['pid']
     pagingTables[inputs['pid']] = []
