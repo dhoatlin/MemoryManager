@@ -151,7 +151,7 @@ def initPageTable(pid, total, status, codeTotal):
       pagingTables[pid].append({'type': 'code', 'logical': str(i), 'status': status})
       count += 1
     else:
-      pagingTables[pid].append({'type': 'code', 'logical':str(i), 'status': status})
+      pagingTables[pid].append({'type': 'data', 'logical':str(i), 'status': status})
 
 '''
 adds the physical address to the page table
