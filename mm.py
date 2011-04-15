@@ -22,12 +22,13 @@ pageFrames = []
 pagingTables = {}
 
 
-
 '''------------------------------------------
 Defining function to be used during execution
 ------------------------------------------'''
 
-#browse function for loading a file
+'''
+Browse function for loading a file, uses tkinter library
+'''
 def browse():
   global currentLine, totalLines
   file = askopenfile(parent=root, mode='rb',title='Choose a file')
@@ -51,7 +52,12 @@ def browse():
     inputbox.config(state=DISABLED)
     outputbox.config(state=DISABLED)
     nextButton.config(state=NORMAL)
-    
+
+'''
+Function for the next button
+
+Tracks which line the program is on and updates the ouputbox/paging frames
+'''
 def nextStep():
   global currentLine, totalLines
   
@@ -75,6 +81,7 @@ def nextStep():
     
   #disable output box
   outputbox.config(state=DISABLED)
+
   '''
   #for debugging: show every process paging table
   keys = pagingTables.keys()
@@ -91,90 +98,99 @@ def nextStep():
     print page
   print '*****************************'
   '''
+
+'''
+Removes a process from it's frames
+
+after removal, it checks to see if there are any waiting processes
+'''
+
 def removeProgram(inputs):
   for i in range(len(pageFrames)):
     if pageFrames[i]['pid'] == inputs['pid']:
       pageFrames[i]['avail'] = True
       pageFrames[i]['label'].config(bg=available, text='Free')
       pageFrames[i]['pid'] = 'N/A'
-  #following FIFO
-  found = 0
-  enough = False
+  #sort keys to follow FIFO
   keys = pagingTables.keys()
   keys.sort()
   for key in keys:
     for i in range(len(pagingTables[key])):
       if pagingTables[key][i]['status'] == 'waiting':
-        #if pid is waiting, check for enough room
-        for j in range(len(pagingTables[key])):
-          if pageFrames[j]['avail']:
-            found += 1
-          if found == len(pagingTables[key]):
-            enough = True
-            break
+        enough = checkAvailSpace(len(pagingTables[key]))
         if enough:
-          for page in pagingTables[key]:
-            for j in range(len(pageFrames)):
-              if pageFrames[j]['avail']:
-                page['physical'] = str(j)
-                page['status'] = 'running'
-                labelText = page['type'] + '-' + page['logical'] + ' of P' + key
-                pageFrames[j]['label'].config(bg=taken, text=labelText)
-                pageFrames[j]['avail'] = False
-                pageFrames[j]['pid'] = key
-                break
-        found = 0
-        enough = False
+          addPhysicalLocation(key, True)
   
-  
+'''
+loads a process into it's frames
+
+initializes new process page tables
+'''
 def loadProgram(inputs):
   total = inputs['codeSize'] + inputs['dataSize']
+  enough = checkAvailSpace(total)
+  #enough room -> add paging table to program
+  if enough:
+    initPageTable(inputs['pid'], total, 'running', inputs['codeSize'])
+      
+    #add physical location
+    addPhysicalLocation(inputs['pid'], False)
+        
+  else:
+    initPageTable(inputs['pid'], total, 'waiting', inputs['codeSize'])
+
+
+'''
+builds a new paging table without a physical location yet
+'''
+def initPageTable(pid, total, status, codeTotal):
+  pagingTables[pid] = []
+  count = 0
+  for i in range(total):
+    if count < codeTotal:
+      pagingTables[pid].append({'type': 'code', 'logical': str(i), 'status': status})
+      count += 1
+    else:
+      pagingTables[pid].append({'type': 'code', 'logical':str(i), 'status': status})
+
+'''
+adds the physical address to the page table
+'''
+def addPhysicalLocation(pid, restore):
+  for page in pagingTables[pid]:
+    for i in range(len(pageFrames)):
+      if(pageFrames[i]['avail']):
+        page['physical'] = str(i)
+        if restore:
+          page['status'] = 'running'
+        labelText = page['type'] + '-' + page['logical'] + ' of P' + pid
+        pageFrames[i]['label'].config(bg=taken, text=labelText)
+        pageFrames[i]['avail'] = False
+        pageFrames[i]['pid'] = pid
+        break
+
+'''
+checks if there is enough frames for a new process
+
+returns true if space is available
+'''
+def checkAvailSpace(total):
   found = 0
   enough = False
-  
-  #first check if there is enough room for a new program
-  #refactor this to new function...
   for i in range(len(pageFrames)):
     if pageFrames[i]['avail']:
       found += 1
     if found == total:
       enough = True
       break
-    
-  #enough room -> add paging table to program
-  if enough:
-    pagingTables[inputs['pid']] = []
-    cCount = 0
-    #initialize paging table
-    for i in range(total):
-      if cCount < inputs['codeSize']:
-        pagingTables[inputs['pid']].append({'type': 'code', 'logical': str(i), 'status': 'running'})
-        cCount += 1
-      else:
-        pagingTables[inputs['pid']].append({'type': 'data', 'logical': str(i), 'status': 'running'})
-      
-    #add physical location
-    for page in pagingTables[inputs['pid']]:
-      for i in range(len(pageFrames)):
-        if(pageFrames[i]['avail']):
-          page['physical'] = str(i)
-          labelText = page['type'] + '-' + page['logical'] + ' of P' + inputs['pid']
-          pageFrames[i]['label'].config(bg=taken, text=labelText)
-          pageFrames[i]['avail'] = False
-          pageFrames[i]['pid'] = inputs['pid']
-          break
-        
-  else:
-    pagingTables[inputs['pid']] = []
-    cCount = 0
-    #initialize paging table
-    for i in range(total):
-      if cCount < inputs['codeSize']:
-        pagingTables[inputs['pid']].append({'type': 'code', 'logical': str(i), 'status': 'waiting'})
-        cCount += 1
-      else:
-        pagingTables[inputs['pid']].append({'type': 'data', 'logical': str(i), 'status': 'waiting'})
-  
+  return enough  
+
+'''
+parses a line from the inputbox
+
+loads and removes programs where needed
+prints to output box some information about a new program
+'''
 def parseInput(inputLine):
   global pageSize
   splitInput = inputLine.split()
